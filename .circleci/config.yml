@@ -1,0 +1,41 @@
+defaults: &defaults
+  docker:
+    - image: circleci/node:8.11.4
+  working_directory: ~/repo
+
+commands:
+  docker_layer_caching:
+    description: "Setup Docker layer caching"
+    steps:
+      - setup_remote_docker: #enable docker command
+          docker_layer_caching: true
+
+version: 2.1
+jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - docker_layer_caching
+
+      - run:
+          name: Build and Tag Production Image
+          command: docker build -t spec-queue-client .
+
+      - run:
+          name: Create junit result directory
+          command: mkdir -p ~/junit
+
+      - run:
+          name: run service unit tests
+          command: docker run --init --tty spec-queue-client
+
+#      - run:
+#          name: copy test results
+#          command: docker cp $(docker ps -a -l -q):/results/results.xml ~/junit/test-results.xml
+#          when: always
+
+      - store_test_results:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/junit
