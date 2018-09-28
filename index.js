@@ -5,12 +5,11 @@
 const _ = require('lodash')
 	, rp = require('request-promise');
 
-module.exports = {
-	specQueueClient,
+module.exports = _.assign(specQueueClient, {
 	create,
 	pop,
 	remove
-}
+})
 
 /**
  * Creates a new queue referenced by id

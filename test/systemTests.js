@@ -11,7 +11,8 @@ const chai = require('chai')
 	, emptyExpected = {empty: true}
 	, queue = [i1, i2, i3]
 	, uri = 'https://us-central1-spec-queue.cloudfunctions.net/queue'
-	, { specQueueClient, create, pop, remove } = require('..')
+	, specQueueClient = require('..')
+	, { create, pop, remove } = specQueueClient
 	, sqc = specQueueClient(uri)
 
 chai.should()
