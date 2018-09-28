@@ -1,16 +1,9 @@
 /**
  * Promise functions for the spec-queue
- *
- *
- * @type {*}
- * @private
  */
 
 const _ = require('lodash')
 	, rp = require('request-promise');
-
-
-
 
 module.exports = {
 	specQueueClient,
@@ -32,18 +25,8 @@ function create({uri, id, queue}){
 	uri =   uri   || arguments[0]
 	id =    id    || arguments[1].id    || arguments[1]
 	queue = queue || arguments[1].queue || arguments[2]
+
 	return postQueue(uri, 'create', id, queue)
-}
-
-function postQueue(uri, command, id, queue) {
-	return rp({
-		uri,
-		method: 'post',
-		json:true,
-		body:{ command, id, queue }
-	})
-				.catch(e => console.log('e', e))
-
 }
 
 /**
@@ -72,13 +55,17 @@ function remove({uri, id}) {
 	return postQueue(uri, 'remove', id)
 }
 
-
-function specQueueClient(url) {
+/**
+ * wrap create, pop, remove in uri
+ * @param uri
+ * @returns {{uri: (function(): *), create: *, pop: *, remove: *}}
+ */
+function specQueueClient(uri) {
 	return {
-		url: () => url,
-		create: createUriWrapper(url),
-		pop: popUriWrapper(url),
-		remove:removeUriWrapper(url)
+		uri: () => uri,
+		create: createUriWrapper(uri),
+		pop: popUriWrapper(uri),
+		remove:removeUriWrapper(uri)
 	}
 }
 
@@ -93,4 +80,17 @@ function popUriWrapper(uri) {
 
 function removeUriWrapper(uri) {
 	return remove.bind(null, uri)
+}
+
+function postQueue(uri, command, id, queue) {
+	return rp({
+		uri,
+		method: 'post',
+		json:true,
+		body:{
+			command,
+			id,
+			...queue && {queue}
+		}
+	})
 }
