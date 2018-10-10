@@ -20,12 +20,12 @@ module.exports = _.assign(specQueueClient, {
  * @param queue
  * @return Promise
  */
-function create({uri, id, queue}){
+function create({uri, id, count}){
 	uri =   uri   || arguments[0]
 	id =    id    || arguments[1].id    || arguments[1]
-	queue = queue || arguments[1].queue || arguments[2]
+	count = count || arguments[1].count || arguments[2]
 
-	return postQueue(uri, 'create', id, queue)
+	return postQueue({uri, command:'create', id, count})
 }
 
 /**
@@ -35,10 +35,11 @@ function create({uri, id, queue}){
  * @param id of the queue to pop
  * @return Promise next item off the queue or empty
  */
-function pop({uri, id}) {
+function pop({uri, id, size}) {
 	uri =   uri   || arguments[0]
 	id =    id    || arguments[1].id    || arguments[1]
-	return postQueue(uri, 'pop', id)
+	size =  size  || arguments[1].size  || arguments[2]
+	return postQueue({uri, command:'pop', id, size})
 }
 
 /**
@@ -51,7 +52,7 @@ function pop({uri, id}) {
 function remove({uri, id}) {
 	uri =   uri   || arguments[0]
 	id =    id    || arguments[1].id    || arguments[1]
-	return postQueue(uri, 'remove', id)
+	return postQueue({uri, command:'remove', id})
 }
 
 /**
@@ -81,7 +82,7 @@ function removeUriWrapper(uri) {
 	return remove.bind(null, uri)
 }
 
-function postQueue(uri, command, id, queue) {
+function postQueue({uri, command, id, count, size}) {
 	return rp({
 		uri,
 		method: 'post',
@@ -89,7 +90,8 @@ function postQueue(uri, command, id, queue) {
 		body:{
 			command,
 			id,
-			...queue && {queue}
+			...count && {count},
+			...size && {size}
 		}
 	})
 }

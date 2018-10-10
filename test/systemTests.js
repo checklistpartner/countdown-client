@@ -2,14 +2,13 @@ const chai = require('chai')
 	, _ = require('lodash')
 	, id = Math.random().toString().replace('.', '')
 	, noQueueId = 'noQueueId'
-	, i1 = {item: '1'}
-	, i2 = {item: '2'}
-	, i3 = {item: '3'}
-	, i1Expected = {next: i1}
-	, i2Expected = {next: i2}
-	, i3Expected = {next: i3}
+	, count = 150
+	, size1 = 50
+	, pop1Expected =    {next: {start: 0, end: 49}}
+	, pop2Expected =    {next: {start: 50, end: 99}}
+	, pop3Expected =    {next: {start: 100, end: 149}}
+	, popAllExpected =  {next: {start: 0, end: 149}}
 	, emptyExpected = {empty: true}
-	, queue = [i1, i2, i3]
 	, uri = 'https://us-central1-spec-queue.cloudfunctions.net/queue'
 	, specQueueClient = require('..')
 	, { create, pop, remove } = specQueueClient
@@ -49,12 +48,12 @@ describe('spec-queue-client', function() {
 			afterEach(() => remove(uri, id))
 
 			it(`should ${itPrefix}create a new queue`, () =>
-				create(uri, id, queue)
+				create(uri, id, count)
 					.should.eventually.deep.equal({})
 			)
 
 			it(`should ${itPrefix}create a new queue with object arguments`, () =>
-				create({uri, id, queue})
+				create({uri, id, count})
 					.should.eventually.deep.equal({})
 			)
 		})
@@ -63,41 +62,50 @@ describe('spec-queue-client', function() {
 		describe(`${itPrefix}pop`, function() {
 
 			describe('existing queue', function()  {
-				beforeEach(() => create(uri, id, queue))
+				beforeEach(() => create(uri, id, count))
 				// afterEach(() => remove(uri, id))
 
 				it(`should ${itPrefix}pop a queue`, () =>
-					pop(uri, id)
-						.should.eventually.deep.equal(i1Expected)
+					pop(uri, id, size1)
+						.should.eventually.deep.equal(pop1Expected)
 				)
 
 				it(`should ${itPrefix}pop a queue to empty`, () =>
-					 pop(uri, id)              .should.eventually.deep.equal(i1Expected)
-						.then(() => pop(uri, id)).should.eventually.deep.equal(i2Expected)
-						.then(() => pop(uri, id)).should.eventually.deep.equal(i3Expected)
-						.then(() => pop(uri, id)).should.eventually.deep.equal(emptyExpected)
+					 pop(uri, id, size1)              .should.eventually.deep.equal(pop1Expected)
+						.then(() => pop(uri, id, size1)).should.eventually.deep.equal(pop2Expected)
+						.then(() => pop(uri, id, size1)).should.eventually.deep.equal(pop3Expected)
+						.then(() => pop(uri, id, size1)).should.eventually.deep.equal(emptyExpected)
+				)
+
+				it(`should ${itPrefix}pop a queue past empty`, () =>
+					 pop(uri, id, count + 10).should.eventually.deep.equal(popAllExpected)
 				)
 
 				it(`should ${itPrefix}pop a queue with object arguments`, () =>
-					pop({uri, id})
-						.should.eventually.deep.equal(i1Expected)
+					pop({uri, id, size:size1})
+						.should.eventually.deep.equal(pop1Expected)
 				)
 
 				it(`should ${itPrefix}create pop concurrently from an existing queue`, function() {
 					this.timeout(40000)
-					const count = 200
-					const queue = _.range(count).map(i => ({item: i}))
-					const expecteds = _.range(count).map(i => ({next:{item: i}}))
-					return create(uri, id, queue).should.eventually.deep.equal({})
+					const cCount = 200
+					const count = 2000
+					const size = 10
+					const expecteds = _.range(cCount).map(i => ({next:{start:i*size, end:i*size + size - 1}}))
+
+					console.log(`popping ${cCount} concurrent please wait`)
+
+					return create(uri, id, count)
+						.should.eventually.deep.equal({})
 						.then(() => {
-							const pops = _.range(count).map(() => pop({uri, id:id})
+							const pops = _.range(cCount).map(() => pop({uri, id, size})
 								.should.eventually.not.deep.equal(emptyExpected)
 								.then(actual => {
 									_.remove(expecteds, expected => _.isEqual(expected, actual))
 										.should.have.length(1, `${actual} wasn't removed from expected`)
 									return actual
 								})
-								
+
 							)
 							return Promise.all(pops)
 								.then(() => expecteds)
@@ -108,13 +116,13 @@ describe('spec-queue-client', function() {
 			})
 
 			it(`should ${itPrefix}pop a non existent queue`, () =>
-				pop(uri, noQueueId)
+				pop(uri, noQueueId, size1)
 					.should.eventually.deep.equal(emptyExpected)
 
 			)
 
 			it(`should ${itPrefix}pop a non existent queue with object arguments`, () =>
-				pop({uri, id:noQueueId})
+				pop({uri, id:noQueueId, size:size1})
 					.should.eventually.deep.equal(emptyExpected)
 			)
 
