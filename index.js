@@ -1,23 +1,23 @@
 /**
- * Promise functions for the spec-queue
+ * Promise functions for the countdown
  */
 
 const _ = require('lodash')
 	, rp = require('request-promise');
 
-module.exports = _.assign(specQueueClient, {
+module.exports = _.assign(countdownClient, {
 	create,
-	pop,
+	decrement,
 	remove
 })
 
 /**
- * Creates a new queue referenced by id
- * Overwrites existing queue reference by id
+ * Creates a new count referenced by id
+ * Overwrites existing count reference by id
  *
  * @param uri
  * @param id
- * @param queue
+ * @param count
  * @return Promise
  */
 function create({uri, id, count}){
@@ -25,46 +25,46 @@ function create({uri, id, count}){
 	id =    id    || arguments[1].id    || arguments[1]
 	count = count || arguments[1].count || arguments[2]
 
-	return postQueue({uri, command:'create', id, count})
+	return postCount({uri, command:'create', id, count})
 }
 
 /**
- * Pops the next item of the queue reference by id
+ * decrements the next item of the count reference by id
  *
  * @param uri
- * @param id of the queue to pop
- * @return Promise next item off the queue or empty
+ * @param id of the count to decrement
+ * @return Promise next item off the count or empty
  */
-function pop({uri, id, size}) {
+function decrement({uri, id, size}) {
 	uri =   uri   || arguments[0]
 	id =    id    || arguments[1].id    || arguments[1]
 	size =  size  || arguments[1].size  || arguments[2]
-	return postQueue({uri, command:'pop', id, size})
+	return postCount({uri, command:'decrement', id, size})
 }
 
 /**
- * remove the the queue reference by id
+ * remove the the count reference by id
  *
  * @param uri
- * @param id of the queue to remove
+ * @param id of the count to remove
  * @return Promise empty
  */
 function remove({uri, id}) {
 	uri =   uri   || arguments[0]
 	id =    id    || arguments[1].id    || arguments[1]
-	return postQueue({uri, command:'remove', id})
+	return postCount({uri, command:'remove', id})
 }
 
 /**
- * wrap create, pop, remove in uri
+ * wrap create, decrement, remove in uri
  * @param uri
- * @returns {{uri: (function(): *), create: *, pop: *, remove: *}}
+ * @returns {{uri: (function(): *), create: *, decrement: *, remove: *}}
  */
-function specQueueClient(uri) {
+function countdownClient(uri) {
 	return {
 		uri: () => uri,
 		create: createUriWrapper(uri),
-		pop: popUriWrapper(uri),
+		decrement: decrementUriWrapper(uri),
 		remove:removeUriWrapper(uri)
 	}
 }
@@ -74,15 +74,15 @@ function createUriWrapper(uri) {
 	return create.bind(null, uri)
 }
 
-function popUriWrapper(uri) {
-	return pop.bind(null, uri)
+function decrementUriWrapper(uri) {
+	return decrement.bind(null, uri)
 }
 
 function removeUriWrapper(uri) {
 	return remove.bind(null, uri)
 }
 
-function postQueue({uri, command, id, count, size}) {
+function postCount({uri, command, id, count, size}) {
 	return rp({
 		uri,
 		method: 'post',

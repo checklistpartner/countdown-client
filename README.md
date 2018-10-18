@@ -1,3 +1,3 @@
-# spec-queue-client
-Node client for spec-queue
-Promise functions for spec-queue
+# countdown-client
+Node client for countdown
+Promise functions for countdown

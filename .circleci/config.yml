@@ -11,7 +11,7 @@ jobs:
 
       - run:
           name: Build and Tag Production Image
-          command: docker build -t spec-queue-client .
+          command: docker build -t countdown-client .
 
       - run:
           name: Create junit result directory
@@ -19,7 +19,7 @@ jobs:
 
       - run:
           name: run service unit tests
-          command: docker run --init --tty spec-queue-client
+          command: docker run --init --tty countdown-client
 
       - run:
           name: copy test results

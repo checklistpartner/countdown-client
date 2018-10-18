@@ -1,21 +1,21 @@
 {
-  "name": "spec-queue-client",
-  "version": "1.0.0",
-  "description": "Node client for spec-queue",
+  "name": "countdown-client",
+  "version": "2.0.0",
+  "description": "Node client for countdown",
   "main": "index.js",
   "scripts": {
     "test": "node_modules/.bin/mocha"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/checklistpartner/spec-queue-client.git"
+    "url": "git+https://github.com/checklistpartner/countdown-client.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/checklistpartner/spec-queue-client/issues"
+    "url": "https://github.com/checklistpartner/countdown-client/issues"
   },
-  "homepage": "https://github.com/checklistpartner/spec-queue-client#readme",
+  "homepage": "https://github.com/checklistpartner/countdown-client#readme",
   "dependencies": {
     "request": "^2.88.0",
     "request-promise": "^4.2.2"
