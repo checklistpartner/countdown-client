@@ -7,7 +7,6 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker: #enable docker command
-          docker_layer_caching: true
 
       - run:
           name: Build and Tag Production Image
