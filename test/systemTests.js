@@ -93,7 +93,7 @@ describe('countdown-client', function() {
 					const size = 10
 					const expecteds = _.range(cCount).map(i => ({next:{start:i*size, end:i*size + size - 1}}))
 
-					console.log(`decrementping ${cCount} concurrent please wait`)
+					console.log(`decrementing ${cCount} concurrent please wait`)
 
 					return create(uri, id, count)
 						.should.eventually.deep.equal({})

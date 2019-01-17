@@ -1,12 +1,27 @@
 version: 2.1
-jobs:
-  build:
+
+executors:
+  docker-executor:
     docker:
       - image: circleci/node:8.11.4
     working_directory: ~/repo
+    resource_class: small
+
+commands:
+  docker_layer_caching:
+    description: "Setup Docker layer caching"
+    steps:
+      - setup_remote_docker: #enable docker command
+          version: 18.06.0-ce
+          docker_layer_caching: true
+
+
+jobs:
+  build:
+    executor: docker-executor
     steps:
       - checkout
-      - setup_remote_docker: #enable docker command
+      - docker_layer_caching
 
       - run:
           name: Build and Tag Production Image

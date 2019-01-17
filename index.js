@@ -1,5 +1,11 @@
 /**
  * Promise functions for the countdown
+ *
+ *
+ * curl --header "Content-Type: application/json" \
+        --request POST \
+        --data '{"command":"create","id":"abc", "count":20}' \
+        https://us-east1-countdown-219723.cloudfunctions.net/countdown
  */
 
 const _ = require('lodash')
