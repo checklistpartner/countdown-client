@@ -11,14 +11,14 @@ const chai = require('chai')
 	, emptyExpected = {empty: true}
 	, uri = 'https://us-east1-countdown-219723.cloudfunctions.net/countdown'
 	, countdownClient = require('..')
-	, { create, decrement, remove } = countdownClient
+	, { create, decrement, remove, addResult } = countdownClient
 	, sqc = countdownClient(uri)
 
 chai.should()
 chai.use(require('chai-as-promised'))
 
 const types = {
-	functions: {itPrefix: '', create, decrement, remove},
+	functions: {itPrefix: '', create, decrement, remove, addResult},
 	countdownClient: {
 		itPrefix: 'countdownClient.',
 		create: function () {
@@ -43,6 +43,13 @@ describe('countdown-client', function() {
 		'countdownClient'
 	]).map(type => {
 		const {itPrefix, create, decrement, remove} = types[type]
+
+		describe.only(`${itPrefix}addResult`, function() {
+			it(`should ${itPrefix}addResult`, () =>
+				addResult(uri, id, 'resultIdTest', 'result string')
+					.should.eventually.deep.equal({})
+			)
+		})
 
 		describe(`${itPrefix}create`, function() {
 			afterEach(() => remove(uri, id))
@@ -152,6 +159,8 @@ describe('countdown-client', function() {
 			)
 		})
 	})
+
+
 })
 
 

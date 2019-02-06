@@ -6,12 +6,18 @@
         --request POST \
         --data '{"command":"create","id":"abc", "count":20}' \
         https://us-east1-countdown-219723.cloudfunctions.net/countdown
+ *
+ * curl --header "Content-Type: application/json" \
+        --request POST \
+        --data '{"command":"addResult","id":"abc", "resultId":200, "result":["123", "321", "sdfsfd"]}' \
+        https://us-east1-countdown-219723.cloudfunctions.net/countdown
  */
 
 const _ = require('lodash')
 	, rp = require('request-promise');
 
 module.exports = _.assign(countdownClient, {
+	addResult,
 	create,
 	decrement,
 	remove
@@ -32,6 +38,24 @@ function create({uri, id, count}){
 	count = count || arguments[1].count || arguments[2]
 
 	return postCount({uri, command:'create', id, count})
+}
+
+function addResult({uri, id, resultId, result}){
+	uri =   uri   || arguments[0]
+	id =    id    || arguments[1].id    || arguments[1]
+	resultId =  resultId  || arguments[1].resultId  || arguments[2]
+	result =  result      || arguments[1].result  || arguments[3]
+	return rp({
+		uri,
+		method: 'post',
+		json:true,
+		body:{
+			command:'addResult',
+			id,
+			resultId,
+			result
+		}
+	})
 }
 
 /**
@@ -71,10 +95,15 @@ function countdownClient(uri) {
 		uri: () => uri,
 		create: createUriWrapper(uri),
 		decrement: decrementUriWrapper(uri),
-		remove:removeUriWrapper(uri)
+		remove:removeUriWrapper(uri),
+		addResult:addResultUriWrapper(uri)
 	}
 }
 
+
+function addResultUriWrapper(uri) {
+	return addResult.bind(null, uri)
+}
 
 function createUriWrapper(uri) {
 	return create.bind(null, uri)
