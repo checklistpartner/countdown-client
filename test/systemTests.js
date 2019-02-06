@@ -4,12 +4,15 @@ const chai = require('chai')
 	, noCountId = 'noCountId'
 	, count = 150
 	, size1 = 50
+	, node = 'node1'
 	, decrement1Expected =    {next: {start: 0, end: 49}}
 	, decrement2Expected =    {next: {start: 50, end: 99}}
 	, decrement3Expected =    {next: {start: 100, end: 149}}
 	, decrementAllExpected =  {next: {start: 0, end: 149}}
 	, emptyExpected = {empty: true}
-	, uri = 'https://us-east1-countdown-219723.cloudfunctions.net/countdown'
+	// , uri = 'https://us-east1-countdown-219723.cloudfunctions.net/countdown'
+	, uri = 'https://clp-countdown.herokuapp.com/countdown'
+	// , uri = 'http://localhost:7777/countdown'
 	, countdownClient = require('..')
 	, { create, decrement, remove, addResult } = countdownClient
 	, sqc = countdownClient(uri)
@@ -44,9 +47,10 @@ describe('countdown-client', function() {
 	]).map(type => {
 		const {itPrefix, create, decrement, remove} = types[type]
 
-		describe.only(`${itPrefix}addResult`, function() {
+		describe(`${itPrefix}addResult`, function() {
 			it(`should ${itPrefix}addResult`, () =>
-				addResult(uri, id, 'resultIdTest', 'result string')
+				create(uri, id, count)
+					.then(() => addResult(uri, id, 'resultIdTest', 'result string'))
 					.should.eventually.deep.equal({})
 			)
 		})
@@ -73,15 +77,15 @@ describe('countdown-client', function() {
 				// afterEach(() => remove(uri, id))
 
 				it(`should ${itPrefix}decrement a count`, () =>
-					decrement(uri, id, size1)
+					decrement(uri, id, size1, node)
 						.should.eventually.deep.equal(decrement1Expected)
 				)
 
 				it(`should ${itPrefix}decrement a count to empty`, () =>
-					 decrement(uri, id, size1)              .should.eventually.deep.equal(decrement1Expected)
-						.then(() => decrement(uri, id, size1)).should.eventually.deep.equal(decrement2Expected)
-						.then(() => decrement(uri, id, size1)).should.eventually.deep.equal(decrement3Expected)
-						.then(() => decrement(uri, id, size1)).should.eventually.deep.equal(emptyExpected)
+					 decrement(uri, id, size1, node)              .should.eventually.deep.equal(decrement1Expected)
+						.then(() => decrement(uri, id, size1, node)).should.eventually.deep.equal(decrement2Expected)
+						.then(() => decrement(uri, id, size1, node)).should.eventually.deep.equal(decrement3Expected)
+						.then(() => decrement(uri, id, size1, node)).should.eventually.deep.equal(emptyExpected)
 				)
 
 				it(`should ${itPrefix}decrement a count past empty`, () =>
@@ -89,7 +93,7 @@ describe('countdown-client', function() {
 				)
 
 				it(`should ${itPrefix}decrement a count with object arguments`, () =>
-					decrement({uri, id, size:size1})
+					decrement({uri, id, size:size1, node})
 						.should.eventually.deep.equal(decrement1Expected)
 				)
 
@@ -105,7 +109,7 @@ describe('countdown-client', function() {
 					return create(uri, id, count)
 						.should.eventually.deep.equal({})
 						.then(() => {
-							const decrements = _.range(cCount).map(() => decrement({uri, id, size})
+							const decrements = _.range(cCount).map(() => decrement({uri, id, size, node})
 								.should.eventually.not.deep.equal(emptyExpected)
 								.then(actual => {
 									_.remove(expecteds, expected => _.isEqual(expected, actual))
@@ -123,13 +127,13 @@ describe('countdown-client', function() {
 			})
 
 			it(`should ${itPrefix}decrement a non existent count`, () =>
-				decrement(uri, noCountId, size1)
+				decrement(uri, noCountId, size1, node)
 					.should.eventually.deep.equal(emptyExpected)
 
 			)
 
 			it(`should ${itPrefix}decrement a non existent count with object arguments`, () =>
-				decrement({uri, id:noCountId, size:size1})
+				decrement({uri, id:noCountId, size:size1, node})
 					.should.eventually.deep.equal(emptyExpected)
 			)
 

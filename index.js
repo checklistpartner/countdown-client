@@ -65,11 +65,12 @@ function addResult({uri, id, resultId, result}){
  * @param id of the count to decrement
  * @return Promise next item off the count or empty
  */
-function decrement({uri, id, size}) {
+function decrement({uri, id, size, node}) {
 	uri =   uri   || arguments[0]
 	id =    id    || arguments[1].id    || arguments[1]
 	size =  size  || arguments[1].size  || arguments[2]
-	return postCount({uri, command:'decrement', id, size})
+	node =  node  || _.get(arguments[1], 'node')  || arguments[3]
+	return postCount({uri, command:'decrement', id, size, node})
 }
 
 /**
@@ -117,7 +118,7 @@ function removeUriWrapper(uri) {
 	return remove.bind(null, uri)
 }
 
-function postCount({uri, command, id, count, size}) {
+function postCount({uri, command, id, count, size, node}) {
 	return rp({
 		uri,
 		method: 'post',
@@ -126,7 +127,8 @@ function postCount({uri, command, id, count, size}) {
 			command,
 			id,
 			...count && {count},
-			...size && {size}
+			...size && {size},
+			...node && {node}
 		}
 	})
 }
